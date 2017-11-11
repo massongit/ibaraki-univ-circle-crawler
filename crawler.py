@@ -6,67 +6,83 @@ import requests
 import six
 
 
-def get_circles(campuses):
+class CircleList:
     """
-    Get official circles in Ibaraki University from university's website
-    :param campuses: Campuses of Ibaraki University
-    :return: Dictionary of official circles in Ibaraki University
+    List of official circles in Ibaraki University
     """
-    # サークル一覧が記載されているHP
-    url = 'http://www.ibaraki.ac.jp/collegelife/activity/circle/'
 
-    # サークルリスト
-    circles = dict()
+    def __init__(self):
+        # キャンパス一覧
+        self._campuses = ['mito', 'hitachi', 'ami']
 
-    # 茨城大学公式HPよりサークル一覧を取得し、サークルリストに追加
-    for campus in campuses:
-        # HPのHTML
-        html = requests.get(url + campus).content.decode('UTF-8')
+        # サークル一覧が記載されているHP
+        self._url = 'http://www.ibaraki.ac.jp/collegelife/activity/circle/'
 
+        # サークルリスト
+        self._circle_list = {'circle': dict(), 'campus': dict()}
+
+    def get(self):
+        """
+        Get list of official circles in Ibaraki University
+        :return: List of official circles in Ibaraki University
+        """
+        # 茨城大学公式HPからスクレイピングを行う
+        self._scraping()
+
+        # キャンパスごとのサークル情報
+        campus_data = self._circle_list['campus']
+
+        for campus in ['multi'] + self._campuses:
+            campus_data[campus] = dict()
+
+        # 出力内容を構築
+        for name, data in six.iteritems(self._circle_list['circle']):
+            if len(data['campuses']) == 1:
+                campus_data[data['campuses'][0]][name] = data
+            else:
+                campus_data['multi'][name] = data
+
+        return campus_data
+
+    def _scraping(self):
+        """
+        Do scraping to university's website
+        """
+        for campus in self._campuses:
+            # 茨城大学公式HPのHTML
+            html = requests.get(self._url + campus).content
+
+            self._add(html, campus)
+
+    def _add(self, html, campus):
+        """
+        Add official circles in Ibaraki University to list
+        :param html: HTML of university's website
+        :param campus: Campus of Ibaraki University
+        """
         for td in bs4.BeautifulSoup(html, 'html.parser').find_all('td'):
             # サークル名 (小文字に変換している)
             name = td.text.strip().lower()
 
             if name:
-                circles.setdefault(name, {'campuses': list()})
-                circles[name]['campuses'].append(campus)
-                if td.find('a'):  # サークルのURLがあるとき
-                    circles[name]['url'] = td.find('a').get('href')
-                elif 'url' not in circles[name]:  # サークルのURLがないとき
-                    circles[name]['url'] = ''
+                if name not in self._circle_list['circle']:
+                    self._circle_list['circle'][name] = {'campuses': list()}
 
-    return circles
+                # サークル情報
+                circle_data = self._circle_list['circle'][name]
 
+                circle_data['campuses'].append(campus)
 
-def make_circle_list(campuses):
-    """
-    Make list of official circles in Ibaraki University
-    :param campuses: Campuses of Ibaraki University
-    :return: List of official circles in Ibaraki University
-    """
-    # 出力内容
-    results = dict()
-
-    for campus in ['multi'] + campuses:
-        results[campus] = dict()
-
-    # 出力内容を構築
-    for name, data in six.iteritems(get_circles(campuses)):
-        if len(data['campuses']) == 1:
-            results[data['campuses'][0]][name] = data
-        else:
-            results['multi'][name] = data
-
-    return results
+                if td.find('a') and td.find('a').get('href'):
+                    circle_data['url'] = td.find('a').get('href')
+                else:
+                    circle_data['url'] = ''
 
 
 def main():
     """
     Main function
     """
-    # キャンパス一覧
-    campuses = ['mito', 'hitachi', 'ami']
-
     # 出力ディレクトリ
     output_dir = 'results'
 
@@ -75,7 +91,7 @@ def main():
         os.mkdir(output_dir)
 
     # キャンパスごとにTSV形式で出力
-    for kind, data in six.iteritems(make_circle_list(campuses)):
+    for kind, data in six.iteritems(CircleList().get()):
         # TSVファイルのファイル名
         tsv_file_name = os.path.join(output_dir, os.extsep.join([kind, 'tsv']))
 
