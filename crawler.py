@@ -6,6 +6,20 @@ import requests
 import six
 
 
+def make_circle_data(circle_data, campus, table_cell):
+    """
+    Make circle data
+    :param circle_data: Circle data
+    :param campus: Campus
+    :param table_cell: Table cell of HTML
+    """
+    circle_data['campuses'].append(campus)
+    if table_cell.find('a') and table_cell.find('a').get('href'):
+        circle_data['url'] = table_cell.find('a').get('href')
+    else:
+        circle_data['url'] = ''
+
+
 class CircleList:
     """
     List of official circles in Ibaraki University
@@ -68,15 +82,7 @@ class CircleList:
                 if name not in self._circle_list['circle']:
                     self._circle_list['circle'][name] = {'campuses': list()}
 
-                # サークル情報
-                circle_data = self._circle_list['circle'][name]
-
-                circle_data['campuses'].append(campus)
-
-                if td.find('a') and td.find('a').get('href'):
-                    circle_data['url'] = td.find('a').get('href')
-                else:
-                    circle_data['url'] = ''
+                make_circle_data(self._circle_list['circle'][name], campus, td)
 
 
 def main():
