@@ -6,18 +6,23 @@ import requests
 import six
 
 
-def make_circle_data(circle_data, campus, table_cell):
+def make_circle_data(circle_data, circle_name, campus, table_cell):
     """
     Make circle data
     :param circle_data: Circle data
+    :param circle_name: Circle name
     :param campus: Campus
     :param table_cell: Table cell of HTML
     """
-    circle_data['campuses'].append(campus)
+    if circle_name not in circle_data:
+        circle_data[circle_name] = {'campuses': list()}
+
+    circle_data[circle_name]['campuses'].append(campus)
+
     if table_cell.find('a') and table_cell.find('a').get('href'):
-        circle_data['url'] = table_cell.find('a').get('href')
+        circle_data[circle_name]['url'] = table_cell.find('a').get('href')
     else:
-        circle_data['url'] = ''
+        circle_data[circle_name]['url'] = ''
 
 
 class CircleList:
@@ -79,10 +84,7 @@ class CircleList:
             name = td.text.strip().lower()
 
             if name:
-                if name not in self._circle_list['circle']:
-                    self._circle_list['circle'][name] = {'campuses': list()}
-
-                make_circle_data(self._circle_list['circle'][name], campus, td)
+                make_circle_data(self._circle_list['circle'], name, campus, td)
 
 
 def main():
