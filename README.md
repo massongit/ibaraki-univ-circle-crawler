@@ -1,5 +1,5 @@
 # ibaraki-univ-circle-crawler
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Maintainability](https://api.codeclimate.com/v1/badges/867cd8717cf20a2213be/maintainability)](https://codeclimate.com/github/massongit/ibaraki-univ-circle-crawler/maintainability)  
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Maintainability](https://api.codeclimate.com/v1/badges/867cd8717cf20a2213be/maintainability)](https://codeclimate.com/github/massongit/ibaraki-univ-circle-crawler/maintainability) ![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=massongit/ibaraki-univ-circle-crawler)](https://dependabot.com) 
 Crawls official circles in Ibaraki University from university's website
 
 ## Usage
